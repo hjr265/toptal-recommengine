@@ -1,0 +1,93 @@
+doctype html
+html
+	head
+		meta(charset='utf-8')
+		title Recommendation Engine
+
+		link(rel='stylesheet' href='//fonts.googleapis.com/css?family=Asap')
+		link(rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/css/bootstrap.min.css')
+
+		style(type='text/css').
+			* {
+				font-family: 'Asap';
+			}
+
+	body
+		.container(style='margin-top: 16px;')
+			.row
+				.col-xs-12
+					if !user
+						.row
+							.col-xs-4.col-xs-offset-4
+								h1 Hello, stranger!
+								p Pick a username. No password required; this is utopia.
+								form(method='get')
+									.form-group
+										input.form-control(name='user' placeholder='Username')
+
+									button.btn.btn-primary Login
+
+					else
+						.page-header
+							h1 Hello, #{user}!
+						h2
+							.pull-right
+								form(action='/refresh?user=#{user}' method='post')
+									button.btn.btn-primary Refresh
+							| Recommended Movies
+						if suggestions.length == 0
+							.alert.alert-success Like/dislike a few movies below to generate some recommendations
+
+						else
+							.row
+								for movie, i in suggestions
+									.col-sm-3
+										.thumbnail
+											img(src='#{movie.thumb.url}')
+											.caption
+												h4(style='margin-bottom: 24px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;') #{movie.name}
+												.row
+													.col-xs-6
+														form.text-center(action='/like?movie=#{movie.id}&user=#{user}' method='post')
+															button.btn.btn-default
+																span.glyphicon.glyphicon-thumbs-up
+
+													.col-xs-6
+														form.text-center(action='/dislike?movie=#{movie.id}&user=#{user}' method='post')
+															button.btn.btn-default
+																span.glyphicon.glyphicon-thumbs-down
+
+						.row
+							.col-xs-12
+								h2 All Movies
+								for movie, i in movies
+									if i%4 == 0
+										.row
+											for movie in movies.slice(i, i+4)
+												.col-sm-3
+													.thumbnail
+														img(src='#{movie.thumb.url}')
+														.caption
+															h4(style='margin-bottom: 24px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;') #{movie.name}
+															.row
+																.col-xs-6
+																	if likes.indexOf(movie.id) != -1
+																		form.text-center(action='/like?movie=#{movie.id}&user=#{user}&unset=yes' method='post')
+																			button.btn.btn-default.active
+																				span.glyphicon.glyphicon-thumbs-up
+
+																	else
+																		form.text-center(action='/like?movie=#{movie.id}&user=#{user}' method='post')
+																			button.btn.btn-default
+																				span.glyphicon.glyphicon-thumbs-up
+
+																.col-xs-6
+																	if dislikes.indexOf(movie.id) != -1
+																		form.text-center(action='/dislike?movie=#{movie.id}&user=#{user}&unset=yes' method='post')
+																			button.btn.btn-default.active
+																				span.glyphicon.glyphicon-thumbs-down
+
+																	else
+																		form.text-center(action='/dislike?movie=#{movie.id}&user=#{user}' method='post')
+																			button.btn.btn-default
+																				span.glyphicon.glyphicon-thumbs-down
